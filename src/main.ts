@@ -124,8 +124,10 @@ async function showPreview() {
 
 async function start(v: Vault) {
   vault = v;
-  paths = (await v.list()).map(e => e.path);
-  document.body.classList.add('open');
+  document.body.classList.add('open'); // entrar ya: leer una bóveda grande tarda y no debe verse congelado
+  status('leyendo bóveda…');
+  try { paths = (await v.list(n => { if (n % 50 === 0) status(`leyendo bóveda… ${n} archivos`); })).map(e => e.path); }
+  catch (e) { document.body.classList.remove('open'); $('hint').textContent = 'No se pudo leer la carpeta: ' + e; return; }
   renderTree();
   status(`${paths.length} archivos`);
 }

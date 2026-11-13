@@ -1,6 +1,6 @@
-export interface Entry { path: string; mtime: number }
+export interface Entry { path: string }
 export interface Vault {
-  list(): Promise<Entry[]>;
+  list(onProgress?: (n: number) => void): Promise<Entry[]>;
   read(path: string): Promise<{ data: Blob; mtime: number }>;
   /** Con expectedMtime lanza Conflict si el archivo cambió desde que se leyó (p. ej. editado en Obsidian). Devuelve el nuevo mtime. */
   write(path: string, data: Blob | string, expectedMtime?: number): Promise<number>;
@@ -13,13 +13,13 @@ const SKIP = new Set(['.obsidian', '.git', '.orbita', '.trash', 'node_modules', 
 export class LocalVault implements Vault {
   constructor(private root: FileSystemDirectoryHandle) {}
 
-  async list(): Promise<Entry[]> {
+  async list(onProgress?: (n: number) => void): Promise<Entry[]> {
     const out: Entry[] = [];
     const walk = async (dir: FileSystemDirectoryHandle, prefix: string) => {
       for await (const [name, h] of dir.entries()) {
         if (SKIP.has(name)) continue;
         if (h.kind === 'directory') await walk(h as FileSystemDirectoryHandle, prefix + name + '/');
-        else out.push({ path: prefix + name, mtime: (await (h as FileSystemFileHandle).getFile()).lastModified });
+        else { out.push({ path: prefix + name }); onProgress?.(out.length); } // sin getFile(): en OneDrive abrir miles de archivos es lentísimo
       }
     };
     await walk(this.root, '');
@@ -68,7 +68,7 @@ export class LocalVault implements Vault {
 export class MemoryVault implements Vault {
   private files = new Map<string, { data: Blob; mtime: number }>();
   constructor(seed: Record<string, string>) { for (const [p, t] of Object.entries(seed)) this.files.set(p, { data: new Blob([t]), mtime: 1 }); }
-  async list() { return [...this.files].map(([path, f]) => ({ path, mtime: f.mtime })); }
+  async list() { return [...this.files.keys()].map(path => ({ path })); }
   async read(path: string) { const f = this.files.get(path); if (!f) throw new Error('No existe: ' + path); return f; }
   async write(path: string, data: Blob | string, expectedMtime?: number) {
     const old = this.files.get(path);
