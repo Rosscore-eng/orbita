@@ -107,7 +107,7 @@ function renderTree() {
   const q = $<HTMLInputElement>('q').value.toLowerCase();
   const ul = $('tree'); ul.replaceChildren();
   for (const p of paths.filter(p => p.endsWith('.md') && p.toLowerCase().includes(q)).sort().slice(0, 500)) {
-    const b = document.createElement('button'); b.textContent = p.replace(/\.md$/, ''); b.onclick = () => openNote(p);
+    const b = document.createElement('button'); const i = p.lastIndexOf('/'); b.textContent = p.slice(i + 1).replace(/\.md$/, ''); if (i > 0) b.append(Object.assign(document.createElement('small'), { textContent: p.slice(0, i) })); b.title = p; b.onclick = () => openNote(p);
     const li = document.createElement('li'); li.append(b); ul.append(li);
   }
 }
@@ -116,7 +116,10 @@ function showEditor() { $('preview').hidden = true; $('editor').hidden = false; 
 async function showPreview() {
   await save();
   const el = $('preview');
-  el.innerHTML = DOMPurify.sanitize(await marked.parse(view.state.doc.toString())); // shortcut: sin callouts ni frontmatter, ver NEXT.md
+  const src = view.state.doc.toString();
+  const fm = /^---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(src); // propiedades de Obsidian: se muestran plegadas, no como texto
+  const props = fm ? `<details class="props"><summary>propiedades</summary><pre>${esc(fm[1])}</pre></details>` : '';
+  el.innerHTML = props + DOMPurify.sanitize(await marked.parse(fm ? src.slice(fm[0].length) : src)); // shortcut: sin callouts ni Dataview, ver NEXT.md
   for (const img of el.querySelectorAll<HTMLImageElement>('img[data-vault]'))
     vault.read(img.dataset.vault!).then(r => { img.src = URL.createObjectURL(r.data); });
   $('editor').hidden = true; el.hidden = false; $('mode').textContent = 'editar';
