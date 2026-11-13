@@ -48,9 +48,9 @@ void main(){
   gl_FragColor=vec4(col,1.);
 }`;
 
-export function blackHole(canvas: HTMLCanvasElement) {
+export function blackHole(canvas: HTMLCanvasElement): { pause(): void; resume(): void } {
   const gl = canvas.getContext('webgl', { antialias: false, powerPreference: 'low-power' });
-  if (!gl) return; // sin WebGL queda el degradado estático del CSS
+  if (!gl) return { pause() {}, resume() {} }; // sin WebGL queda el degradado estático del CSS
   const sh = (type: number, src: string) => {
     const s = gl.createShader(type)!; gl.shaderSource(s, src); gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
@@ -67,16 +67,21 @@ export function blackHole(canvas: HTMLCanvasElement) {
   const uR = gl.getUniformLocation(pr, 'R'), uT = gl.getUniformLocation(pr, 'T');
 
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let last = -1e9;
+  let last = -1e9, running = false;
   const frame = (ms: number) => {
+    if (!running) return;
     if (!still) requestAnimationFrame(frame);
     if (ms - last < 33) return; // 30 fps bastan y cuidan los PCs modestos
     last = ms;
     const w = Math.ceil(canvas.clientWidth / 2), h = Math.ceil(canvas.clientHeight / 2); // media resolución
+    if (!w || !h) return;
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); }
     gl.uniform2f(uR, w, h); gl.uniform1f(uT, ms / 1000);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
-  requestAnimationFrame(frame);
+  const resume = () => { if (running) return; running = true; requestAnimationFrame(frame); };
+  resume();
   if (still) addEventListener('resize', () => requestAnimationFrame(frame));
+  // Dentro de la bóveda el fondo se detiene: no gasta GPU detrás del texto.
+  return { pause() { running = false; }, resume };
 }

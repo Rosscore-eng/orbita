@@ -1,16 +1,50 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#050403"><title>Órbita</title></head>
+<meta name="theme-color" content="#0d1117"><title>Órbita</title></head>
 <body>
 <canvas id="bh" aria-hidden="true"></canvas>
 <section id="hero">
   <h1>Órbita</h1>
   <p class="tt">tu bóveda, en la web</p>
-  <button id="open">abrir bóveda</button>
+  <div class="hero-actions">
+    <button id="reopen" class="primary" hidden></button>
+    <button id="open" class="primary">abrir bóveda</button>
+  </div>
   <button id="demo" class="link">ver una demostración</button>
   <p id="hint" role="status"></p>
 </section>
-<aside><input id="q" placeholder="buscar" aria-label="Buscar nota"><ul id="tree"></ul></aside>
-<main><header><span id="title">Órbita</span><span id="status" role="status"></span><button id="mode" hidden>vista previa</button></header>
-<div id="editor"></div><article id="preview" hidden></article></main>
+
+<div id="app" hidden>
+  <nav id="ribbon" aria-label="Vistas">
+    <button id="rb-files" title="Archivos" aria-label="Archivos"></button>
+    <button id="rb-search" title="Buscar" aria-label="Buscar"></button>
+    <button id="rb-graph" title="Grafo 3D" aria-label="Grafo 3D"></button>
+    <span class="spacer"></span>
+    <button id="rb-new" title="Nueva nota" aria-label="Nueva nota"></button>
+    <button id="rb-close" title="Cerrar bóveda" aria-label="Cerrar bóveda"></button>
+  </nav>
+  <aside id="side">
+    <div class="side-head"><span id="vault-name"></span><button id="collapse-all" class="icon-btn" title="Plegar todo" aria-label="Plegar todo"></button></div>
+    <input id="q" type="search" placeholder="Buscar nota…" aria-label="Buscar nota" autocomplete="off">
+    <div id="tree" role="tree"></div>
+    <div class="side-foot"><span id="count"></span></div>
+  </aside>
+  <main>
+    <header><nav id="crumbs" aria-label="Ruta"></nav><span id="status" role="status"></span><button id="mode" class="icon-btn" hidden></button></header>
+    <div id="empty"><div><p class="empty-title">Elige una nota</p><p>Haz clic en el árbol o escribe en el buscador.<br><kbd>Ctrl</kbd>+<kbd>E</kbd> alterna lectura y edición.</p></div></div>
+    <div id="editor" hidden></div>
+    <article id="preview" hidden></article>
+    <section id="graph" hidden>
+      <div id="graph-canvas"></div>
+      <div id="graph-ui">
+        <div class="graph-title">Grafo de la bóveda <span id="graph-count"></span></div>
+        <input id="graph-q" type="search" placeholder="Ir a una nota…" aria-label="Buscar nota en el grafo" autocomplete="off">
+        <div id="graph-hits"></div>
+        <p id="graph-msg"></p>
+        <p class="graph-help">arrastra para girar · rueda para acercar · clic en un nodo para abrirlo</p>
+      </div>
+    </section>
+    <footer id="statusbar"><span id="st-left"></span><span id="st-right"></span></footer>
+  </main>
+</div>
 <script type="module" src="/src/main.ts"></script></body></html>
