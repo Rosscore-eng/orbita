@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050403"><title>Órbita</title></head>
+<body>
+<canvas id="bh" aria-hidden="true"></canvas>
+<section id="hero">
+  <h1>Órbita</h1>
+  <p class="tt">tu bóveda, en la web</p>
+  <button id="open">abrir bóveda</button>
+  <button id="demo" class="link">ver una demostración</button>
+  <p id="hint" role="status"></p>
+</section>
+<aside><input id="q" placeholder="buscar" aria-label="Buscar nota"><ul id="tree"></ul></aside>
+<main><header><span id="title">Órbita</span><span id="status" role="status"></span><button id="mode" hidden>vista previa</button></header>
+<div id="editor"></div><article id="preview" hidden></article></main>
+<script type="module" src="/src/main.ts"></script></body></html>
