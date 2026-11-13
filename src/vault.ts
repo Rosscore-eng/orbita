@@ -11,16 +11,21 @@ const SKIP = new Set(['.obsidian', '.git', '.orbita', '.trash', 'node_modules', 
 
 /** Bóveda en una carpeta local (File System Access API: Chrome/Edge). */
 export class LocalVault implements Vault {
+  /** Carpetas que no se pudieron leer (p. ej. marcadores de OneDrive rotos); se omiten en vez de abortar toda la lectura. */
+  skipped: string[] = [];
   constructor(private root: FileSystemDirectoryHandle) {}
 
   async list(onProgress?: (n: number) => void): Promise<Entry[]> {
     const out: Entry[] = [];
+    this.skipped = [];
     const walk = async (dir: FileSystemDirectoryHandle, prefix: string) => {
-      for await (const [name, h] of dir.entries()) {
-        if (SKIP.has(name)) continue;
-        if (h.kind === 'directory') await walk(h as FileSystemDirectoryHandle, prefix + name + '/');
-        else { out.push({ path: prefix + name }); onProgress?.(out.length); } // sin getFile(): en OneDrive abrir miles de archivos es lentísimo
-      }
+      try {
+        for await (const [name, h] of dir.entries()) {
+          if (SKIP.has(name)) continue;
+          if (h.kind === 'directory') await walk(h as FileSystemDirectoryHandle, prefix + name + '/');
+          else { out.push({ path: prefix + name }); onProgress?.(out.length); } // sin getFile(): en OneDrive abrir miles de archivos es lentísimo
+        }
+      } catch { this.skipped.push(prefix || '/'); }
     };
     await walk(this.root, '');
     return out;

@@ -16,6 +16,7 @@ body{margin:0;display:flex;height:100dvh;color:var(--fg);font:17px/1.5 var(--ser
 #hero h1{font-size:clamp(56px,11vw,104px);font-weight:400;margin:0;line-height:1;letter-spacing:.02em}
 #hero .tt{margin:0 0 10px;font-size:15px}
 #open{font-size:18px;padding:13px 44px}
+#hint:not(:empty){background:rgba(5,4,3,.85);padding:10px 16px;border-radius:12px}
 #hint{max-width:34ch;margin:0;color:var(--acc);font-size:15px;min-height:3em}
 body.open #hero,body:not(.open) aside,body:not(.open) main{display:none}
 

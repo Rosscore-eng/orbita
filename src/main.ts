@@ -129,7 +129,9 @@ async function start(v: Vault) {
   try { paths = (await v.list(n => { if (n % 50 === 0) status(`leyendo bóveda… ${n} archivos`); })).map(e => e.path); }
   catch (e) { document.body.classList.remove('open'); $('hint').textContent = 'No se pudo leer la carpeta: ' + e; return; }
   renderTree();
-  status(`${paths.length} archivos`);
+  const sk = (v as { skipped?: string[] }).skipped ?? [];
+  status(`${paths.length} archivos` + (sk.length ? ` · ${sk.length} carpetas ilegibles omitidas` : ''));
+  if (sk.length) console.warn('Órbita omitió:', sk);
 }
 
 $('preview').addEventListener('click', e => {
